@@ -21,8 +21,6 @@ public class KeyValStorage {
         return this.userDB.containsKey(key);
     }
 
-
-
     public String get(String key) throws Exception {
         if(!contains(key)){
             throw new IllegalArgumentException(" STORAGE::get - KEY DOES NOT EXIST IN THE DB ");

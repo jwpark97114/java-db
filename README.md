@@ -2,14 +2,41 @@
 
 
 
-# FILE BASED DB
+# TABLE BASE STORAGE
 
-## 저장 로직
+## What do we need
 
-1. 모든 저장은 파일에 constant time 복잡도 를 가지는 saveToFile 을 통해 일어납니다
-2. SET 명령을 처리 할 때 기존의 모든 자료를 남겨둔 채 파일의 끝에 정보를 출력해 이어붙입니다 또한 메모리 HashMap 에도 저장됩니다
-3. GET 명령을 처리 할 때 파일을 접근하지 않고 메모리 상 자료구조에서 동작합니다
-4. DELETE 명령을 처리 할 때 기존의 파일 내 정보를 지우지 않고 파일 맨 끝에 동일한 Key 에 파일이 삭제되었다는 정보를 담는 문자열을 기입합니다
-5. 첫 프로그램 실행시 파일을 읽어들이며 메모리 상 HashMap 을 저장된 Key, Value 쌍으로 저장합니다
-    - 동일한 Key 를 마주할 경우 덮어쓰도록 합니다
-    - 동일한 Key 가 메모리에 존재하고, 동시에 파일에서 막 읽어들인 값이 삭제를 나타내면 메모리에서 제거합니다
+1. Current Saving System won't work as this is not scalable
+2. I need to find a way to not only store a line of data but also Table information itself
+      - Some kind of metadata of this Database must be saved and checked for saving and loading
+3. With the split in Metadata and actual data, I also have to find a way to separate tables
+4. Parsing will have to change
+
+
+
+## Things to change vs leave
+
+### We can keep
+1. serialization method
+2. inputInterface
+
+
+### EVERYTHING ELSE MUST GO
+
+
+
+## What classes or methods do I need?
+
+### Table class
+### Metadata class
+### Row class
+### DB class
+### QueryEngine class
+### Possibly new parser class?
+
+
+
+1. Table has multiple rows, row must be made with the constraints from that table's metadata such as what columns it has and so on
+2. Should Row understand what values it holds? 
+2. DB has multiple Tables
+3. Operation on Table must be reflected to file all the time - no more in memory operations
