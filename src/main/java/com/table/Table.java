@@ -14,6 +14,11 @@ public class Table {
 
     // method to add row into the table
 
+    public Table(String name){
+        this.tableName = name;
+    }
+
+
 
     public void enterRow(){
 
