@@ -21,7 +21,7 @@ public class MetaData {
     }
 
     public MetaData(String tableName){
-        this.loadMetaData(this.tableName);
+        this.loadMetaData(tableName);
     }
 
     public int addRowToMetaData(Row rowToAdd){

@@ -14,9 +14,16 @@ public class Table {
 
     // method to add row into the table
 
-    public Table(String name){
+    public Table(String name, boolean loadSave){
         this.tableName = name;
+        if(loadSave){
+            //load
+        }
     }
+//
+//    private static Table createNewTable(String tableName){
+//        return Table(tableName,false);
+//    }
 
 
 
