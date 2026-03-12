@@ -1,50 +1,26 @@
 package com.db;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+
 
 public class InputParser {
 
-    Map<String, InputInterface> commandMap = new HashMap<>();
-    KeyValStorage storage;
+    DBEngine dbEngine;
 
-    public InputParser(KeyValStorage nosql){
-        this.storage = nosql;
-        this.commandMap.put("SET", (String[] kv) -> {
-            this.storage.set(kv[0],kv[1]);
-            return "OK";
-        });
-        this.commandMap.put("GET", (String[] kv) -> {
-            try{
-                return this.storage.get(kv[0]);
-            } catch (Exception e) {
-                return e.getMessage();
-            }
-        });
-        this.commandMap.put("KEYS", (String[] kv) -> {
-            return this.storage.keys();
-        });
-        this.commandMap.put("DELETE", (String[] kv) -> {
-            try{
-                this.storage.delete(kv[0]);
-                return "OK";
-            } catch (Exception e) {
-                return e.getMessage();
-            }
-        });
-        this.commandMap.put("EXIT", (String[] kv)-> {
-            return "EXIT";
-        });
+    public InputParser(DBEngine sqlEngine){
+        this.dbEngine = sqlEngine;
     }
 
-    public String runCommand(String userInput){
-        String[] splitInput = userInput.split(" ");
-        String result = "";
-        try{
-            result = this.commandMap.get(splitInput[0]).runCommand(Arrays.copyOfRange(splitInput,1,splitInput.length));
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+    public void runCommand(String userInput){
+        String[] keywordAndELse = userInput.split(" ",2);
+        String queryLine = keywordAndELse[1].strip();
+        switch (keywordAndELse[0]){
+            case "CREATE" -> {
+                String[] isTableInHere = queryLine.split(" ",2);
+                if(!isTableInHere[0].equals("TABLE")) return;
+                dbEngine.createTable(isTableInHere[1]);
+            }
+            case "INSERT" -> dbEngine.insertIntoTable(queryLine);
+            case "SELECT" -> dbEngine.selectFromTable(queryLine);
+            default -> System.out.println("Unknown Command Try Again");
         }
-        return result;
     }
 }

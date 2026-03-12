@@ -21,12 +21,8 @@ public class Table {
     private String tableName;
     private MetaData meta;
 
-    public void setTableName(String name){
-        this.tableName = name;
-    }
-
-    public void setMetaData(MetaData meta){
-        this.meta = meta;
+    public String getTableName(){
+        return this.tableName;
     }
 
     public Table(String name, String columns){

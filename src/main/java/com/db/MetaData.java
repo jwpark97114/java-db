@@ -38,7 +38,7 @@ public class MetaData {
         currentSize += sizeOfRow;
         int returnIndex = nextIndex;
         nextIndex ++;
-//        saveMetaData(); // Right now it rewrites all metadata everytime
+        saveMetaData(); // Right now it rewrites all metadata everytime
         return returnIndex;
     }
 

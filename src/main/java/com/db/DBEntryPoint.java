@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class DBEntryPoint {
     public static void main(String[] args) {
-        KeyValStorage myStorage = new KeyValStorage();
+
         InputParser userInputParser = new InputParser(myStorage);
         Scanner inputScanner = new Scanner(System.in);
         String userInput = inputScanner.nextLine();
