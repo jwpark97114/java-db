@@ -1,10 +1,12 @@
 package com.table;
 
-import java.nio.ByteBuffer;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
+
 
 public class Row {
 
@@ -32,15 +34,23 @@ public class Row {
 
     public static byte[] rowToBytes(Row rowEntry){
         String[] valuesToSerialize = rowEntry.getValues();
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        output.writeBytes(ByteBuffer.allocate(sizeOfInteger).putInt(rowEntry.getSizeInBytes()).array());
-        for(String val : valuesToSerialize){
-            int sizeOfVal = val.getBytes().length;
-            output.writeBytes(ByteBuffer.allocate(sizeOfInteger).putInt(sizeOfVal).array());
-            output.writeBytes(val.getBytes());
+        try(ByteArrayOutputStream output = new ByteArrayOutputStream();
+            DataOutputStream outStream = new DataOutputStream(output);){
+
+            outStream.writeInt(rowEntry.getSizeInBytes());
+            for(String val : valuesToSerialize){
+                int sizeOfVal = val.getBytes().length;
+                outStream.writeInt(sizeOfVal);
+                outStream.write(val.getBytes());
+            }
+
+            return output.toByteArray();
+
+        }
+        catch (Exception e){
+            throw new RuntimeException(e);
         }
 
-        return output.toByteArray();
     }
 
     private static void addOneValueOntoList(ByteBuffer buffer, List<String> list){

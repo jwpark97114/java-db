@@ -10,23 +10,27 @@ public class MetaData {
     // Holds what columns the table has
     // Tells which row is where in saveFile
     private String tableName;
-    private String[] columNames;
-    private Map<Integer, Long> byteOffset = new HashMap<>();
+    private String[] columnNames;
+    private Map<Integer, Long> idxByteOffsetMap = new HashMap<>();
     private int nextIndex = 0;
     private long currentSize= 0;
 
     public MetaData(String tableName, String[] columns) {
         this.tableName = tableName;
-        this.columNames = columns.clone();
+        this.columnNames = columns.clone();
     }
 
     public MetaData(String tableName){
         this.loadMetaData(tableName);
     }
 
+    public String getTableName(){
+        return this.tableName;
+    }
+
     public int addRowToMetaData(Row rowToAdd){
         long sizeOfRow = rowToAdd.getSizeInBytes();
-        byteOffset.put(nextIndex, currentSize);
+        idxByteOffsetMap.put(nextIndex, currentSize);
         currentSize += sizeOfRow;
         int returnIndex = nextIndex;
         nextIndex ++;
@@ -34,27 +38,30 @@ public class MetaData {
     }
 
     public Long getRowOffsetFromFile(int index){
-        return this.byteOffset.get(index);
+        return this.idxByteOffsetMap.get(index);
     }
 
+    public Integer[] getKeysInOffsetMap(){
+        return this.idxByteOffsetMap.keySet().toArray(new Integer[0]);
+    }
 
     private void writeOffsetMapToOutputStream(DataOutputStream outStream) throws IOException {
-        int numElem = this.byteOffset.size();
+        int numElem = this.idxByteOffsetMap.size();
         outStream.writeInt(numElem);
 
-        for(int key : this.byteOffset.keySet()){
-            Long toWrite = this.byteOffset.get(key);
+        for(int key : this.idxByteOffsetMap.keySet()){
+            Long toWrite = this.idxByteOffsetMap.get(key);
             outStream.writeInt(key);
             outStream.writeLong(toWrite);
         }
     }
 
     private void writeColumnNamesToOutputStream(DataOutputStream outStream) throws IOException{
-        int numElem = this.columNames.length;
+        int numElem = this.columnNames.length;
         outStream.writeInt(numElem);
 
         for(int i=0; i < numElem; i++){
-            byte[] stringInBytes = this.columNames[i].getBytes();
+            byte[] stringInBytes = this.columnNames[i].getBytes();
             int byteSizeOfString = stringInBytes.length;
             outStream.writeInt(byteSizeOfString);
             outStream.write(stringInBytes);
@@ -80,23 +87,23 @@ public class MetaData {
 
     private void loadColumnNames(ByteBuffer buffer){
         int colCount = buffer.getInt();
-        this.columNames = new String[colCount];
+        this.columnNames = new String[colCount];
 
         for(int i =0; i < colCount; i++){
             int size = buffer.getInt();
             byte[] nameInBytes = new byte[size];
             buffer.get(nameInBytes);
-            this.columNames[i] = new String(nameInBytes);
+            this.columnNames[i] = new String(nameInBytes);
         }
     }
 
     private void loadByteOffset(ByteBuffer buffer){
         int mapSize = buffer.getInt();
-        this.byteOffset = new HashMap<>();
+        this.idxByteOffsetMap = new HashMap<>();
         for(int i=0; i< mapSize; i++){
             int index = buffer.getInt();
             Long tmp = buffer.getLong();
-            this.byteOffset.put(index, tmp);
+            this.idxByteOffsetMap.put(index, tmp);
         }
     }
 
