@@ -1,12 +1,17 @@
 package com.table;
 
-import java.util.*;
+
+import com.db.MetaData;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
 
-import static com.table.FilePaths.TABLE_DIR;
+import static com.file.FilePaths.TABLE_DIR;
 
 public class Table {
 
