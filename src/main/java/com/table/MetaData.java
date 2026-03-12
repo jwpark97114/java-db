@@ -1,6 +1,7 @@
 package com.table;
 
 import java.io.*;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,12 +29,15 @@ public class MetaData {
         return this.tableName;
     }
 
+    public String[] getColumnNames(){return  this.columnNames.clone();}
+
     public int addRowToMetaData(Row rowToAdd){
         long sizeOfRow = rowToAdd.getSizeInBytes();
         idxByteOffsetMap.put(nextIndex, currentSize);
         currentSize += sizeOfRow;
         int returnIndex = nextIndex;
         nextIndex ++;
+//        saveMetaData(); // Right now it rewrites all metadata everytime
         return returnIndex;
     }
 
@@ -71,7 +75,7 @@ public class MetaData {
     public void saveMetaData(){
         // we want to store column names, table name,  byteOffset, int, long
         // lets separate saving of byteOffset
-        try(DataOutputStream saveStream = new DataOutputStream( new FileOutputStream(this.tableName + ".meta"));){
+        try(DataOutputStream saveStream = new DataOutputStream( new BufferedOutputStream( new FileOutputStream(this.tableName + ".meta")));){
             byte[] tableNameBytes = this.tableName.getBytes();
             saveStream.writeInt(tableNameBytes.length);
             saveStream.write(tableNameBytes);
@@ -108,7 +112,7 @@ public class MetaData {
     }
 
     public void loadMetaData(String tableName){
-        try(FileInputStream inStream = new FileInputStream(tableName+".meta")){
+        try(BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(tableName+".meta"))){
             ByteBuffer readBuffer = ByteBuffer.wrap(inStream.readAllBytes());
             int tableNameByteLength = readBuffer.getInt();
             byte[] tableNameBytes = new byte[tableNameByteLength];

@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 public class Row {
 
     // Row's Byte[] holds int at its first section
-    List<String> rowValues = new ArrayList<>();
+    private List<String> rowValues = new ArrayList<>();
     public static final int sizeOfInteger = 4;
 
     public Row(String[] values){
