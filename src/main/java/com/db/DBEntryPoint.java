@@ -4,15 +4,15 @@ import java.util.Scanner;
 
 public class DBEntryPoint {
     public static void main(String[] args) {
-
-        InputParser userInputParser = new InputParser(myStorage);
+        DBEngine newEngine = new DBEngine();
+        InputParser userInputParser = new InputParser(newEngine);
         Scanner inputScanner = new Scanner(System.in);
         String userInput = inputScanner.nextLine();
-        String result = userInputParser.runCommand(userInput);
-        while(!result.equalsIgnoreCase("EXIT")){
-            System.out.println(result);
+
+        while(!userInput.equalsIgnoreCase("EXIT")){
+            userInputParser.runCommand(userInput);
             userInput = inputScanner.nextLine();
-            result = userInputParser.runCommand(userInput);
+
         }
     }
 }

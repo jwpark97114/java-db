@@ -43,7 +43,11 @@ public class Table {
         this.savePath = TABLE_DIR.resolve(this.tableName + ".table");
     }
 
-    public String[] parseColumns(String input){
+    public String[] getColumnNames(){
+        return this.meta.getColumnNames().clone();
+    }
+
+    private String[] parseColumns(String input){
         // remove parenthesis
         this.columMatcher= columnPattern.matcher(input);
         if(this.columMatcher.matches()){
@@ -53,7 +57,7 @@ public class Table {
         return null;
     }
 
-    public void addRowInBothTableAndMeta(Row row){
+    private void addRowInBothTableAndMeta(Row row){
         //this returned index is like primary key
         int idx = this.meta.addRowToMetaData(row);
         this.saveRowToFile(row, this.meta.getRowOffsetFromFile(idx));

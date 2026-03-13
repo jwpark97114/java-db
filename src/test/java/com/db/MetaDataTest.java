@@ -1,5 +1,5 @@
-package com.table;
-import com.db.MetaData;
+package com.db;
+import com.table.Row;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
