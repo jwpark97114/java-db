@@ -1,8 +1,6 @@
 package com.table;
 
-
 import com.db.MetaData;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -23,13 +21,7 @@ public class Table {
     private String tableName;
     private MetaData meta;
 
-    public String getTableName(){
-        return this.tableName;
-    }
-
     public Table(String name, String columns){
-        // This is constructor for a new table
-        // when loading a table that is saved just construct it with single String
         String[] parsedColumns = this.parseColumns(columns);
         this.tableName = name;
         this.savePath = TABLE_DIR.resolve(this.tableName + ".table");
@@ -39,12 +31,10 @@ public class Table {
             throw new RuntimeException(e);
         }
         this.meta = new MetaData(this.tableName, parsedColumns);
-        // Load dataPoints with MetaData
 
     }
 
     public Table(String tableNameToLoad){
-        //Loading from saved metadata
         this.meta = new MetaData(tableNameToLoad);
         this.tableName = this.meta.getTableName();
         this.savePath = TABLE_DIR.resolve(this.tableName + ".table");
@@ -55,7 +45,6 @@ public class Table {
     }
 
     private String[] parseColumns(String input){
-        // remove parenthesis
         this.columMatcher= columnPattern.matcher(input);
         if(this.columMatcher.matches()){
             String result = this.columMatcher.group(1);
@@ -65,7 +54,6 @@ public class Table {
     }
 
     private void addRowInBothTableAndMeta(Row row){
-        //this returned index is like primary key
         int idx = this.meta.addRowToMetaData(row);
         this.saveRowToFile(row, this.meta.getRowOffsetFromFile(idx));
     }
@@ -122,7 +110,7 @@ public class Table {
         return  Arrays.stream(allRows).filter(r -> r.getValues()[columnIndex].equals(value)).toArray(Row[]::new);
     }
 
-    public Row loadRowFromFile(RandomAccessFile raf){
+    private Row loadRowFromFile(RandomAccessFile raf){
         try{
             int rowSize = raf.readInt();
             byte[] rowInBytes = new byte[rowSize];
@@ -134,7 +122,7 @@ public class Table {
         }
     }
 
-    public void saveRowToFile(Row rowToWrite, Long location){
+    private void saveRowToFile(Row rowToWrite, Long location){
         try(RandomAccessFile raf = new RandomAccessFile(this.savePath.toFile(), "rw")){
             raf.seek(location);
             byte[] rowsInByte = Row.rowToBytes(rowToWrite);

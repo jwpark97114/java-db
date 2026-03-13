@@ -1,6 +1,5 @@
 package com.db;
 
-
 public class InputParser {
 
     DBEngine dbEngine;

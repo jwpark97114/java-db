@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.nio.ByteBuffer;
 
-
 public class Row {
 
     // Row's Byte[] holds int at its first section
@@ -29,8 +28,6 @@ public class Row {
         }
         return sum + (rowValues.size() * sizeOfInteger);
     }
-
-    // method to create Row from save file
 
     public static byte[] rowToBytes(Row rowEntry){
         String[] valuesToSerialize = rowEntry.getValues();
@@ -61,8 +58,6 @@ public class Row {
         list.add(value);
     }
 
-    // Table must supply BytesToRow the right sized byte array
-    // Or it will break everything
     public static Row BytesToRow(byte[] bytesWithoutRowSizeFromTable){
         ByteBuffer workingBuffer = ByteBuffer.wrap(bytesWithoutRowSizeFromTable);
         List<String> tmpValueStorage = new ArrayList<>();

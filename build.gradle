@@ -20,7 +20,7 @@ java{
 }
 
 application{
-    mainClass = 'com.memdb.InMemory'
+    mainClass = 'com.db.DBEntryPoint'
 }
 
 test{

@@ -1,8 +1,7 @@
 package com.db;
+
 import com.table.Row;
 import com.table.Table;
-import org.jspecify.annotations.Nullable;
-
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.util.*;
@@ -12,6 +11,7 @@ import java.util.stream.Stream;
 import java.util.stream.IntStream;
 
 import static com.file.FilePaths.*;
+
 public class DBEngine {
 
     private Map<String, Table> currentTables = new HashMap<>();
@@ -19,11 +19,6 @@ public class DBEngine {
 
     public DBEngine(){
         loadDBSaves();
-    }
-
-
-    public void executeTableOperation(String operation){
-
     }
 
     public void loadDBSaves(){

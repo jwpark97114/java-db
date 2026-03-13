@@ -1,46 +1,43 @@
 package com.table;
+
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
+
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
+import static com.file.FilePaths.*;
 
 public class TableTest {
 
-    @TempDir
-    Path testDir;
-
-    @TempDir
-    Path saveFile;
-
-    Table testTable;
+    private final String tableName = "test_table";
+    private Path testFilePath;
 
     @BeforeEach
-    public void setUp(){
-//        testTable = new Table();
+    void setUp() throws IOException{
+        Files.deleteIfExists(testFilePath);
+        this.testFilePath = TABLE_DIR.resolve(tableName + ".table");
     }
 
-    @ParameterizedTest
-    @MethodSource("colParserCases")
-    @DisplayName("Table's String Parser for Column Name")
-    public void columnStringParserTest(String original, String[] result){
-//        assertThat(testTable.parseColumns(original)).isEqualTo(result);
+    @AfterEach
+    void clearTestSave() throws IOException {
+        Files.deleteIfExists(testFilePath);
     }
 
-    private static Stream<Arguments> colParserCases(){
-        return Stream.of(
-                Arguments.of("(1,2,3)", new String[] {"1","2","3"}),
-                Arguments.of("(a,c,d,e)",new String[]{"a","c","d","e"}),
-                Arguments.of("(a 1, b..sd, a?!e, asdfs)", new String[]{"a 1", "b..sd", "a?!e", "asdfs"})
-        );
+    @Test
+    void createNewTableFileAndParseColumns(){
+        Table testTable = new Table(tableName, "(col1, col2, col3");
+        assertThat(testTable.getColumnNames()).containsExactly("col1", "col2","col3");
+        assertThat(Files.exists(testFilePath)).isTrue();
     }
 
+    @Test
+    void queryUnknownColumns(){
+        Table testTable = new Table(tableName, "(id, name");
+        assertThatThrownBy(()->testTable.queryResult("amount = 1000")).isInstanceOf(RuntimeException.class);
+    }
 
 
 }

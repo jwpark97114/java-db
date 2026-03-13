@@ -4,16 +4,14 @@ import com.table.Row;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.file.FileSystemException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import static com.file.FilePaths.*;
 import java.nio.file.Files;
+
 public class MetaData {
 
-    // Holds what columns the table has
-    // Tells which row is where in saveFile
     private Path metadataFile;
     private String tableName;
     private String[] columnNames;
@@ -53,7 +51,7 @@ public class MetaData {
         currentSize += sizeOfRow + Row.sizeOfInteger;
         int returnIndex = nextIndex;
         nextIndex ++;
-        saveMetaData(); // Right now it rewrites all metadata everytime
+        saveMetaData();
         return returnIndex;
     }
 
@@ -89,8 +87,6 @@ public class MetaData {
     }
 
     public void saveMetaData(){
-        // we want to store column names, table name,  byteOffset, int, long
-        // lets separate saving of byteOffset
         try(DataOutputStream saveStream = new DataOutputStream( new BufferedOutputStream( new FileOutputStream(this.metadataFile.toFile())));){
             byte[] tableNameBytes = this.tableName.getBytes();
             saveStream.writeInt(tableNameBytes.length);
