@@ -19,7 +19,7 @@ public class Row {
     }
 
     public String[] getValues(){
-        return this.rowValues.toArray(new String[1]);
+        return this.rowValues.toArray(new String[0]);
     }
 
     public int getSizeInBytes(){

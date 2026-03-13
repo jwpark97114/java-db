@@ -14,10 +14,11 @@ import java.util.stream.IntStream;
 import static com.file.FilePaths.*;
 public class DBEngine {
 
-    private List<Table> currentTables;
+    private Map<String, Table> currentTables = new HashMap<>();
+    private Path loadPath = BASE_DIR;
 
     public DBEngine(){
-        this.currentTables = loadDBSaves();
+        loadDBSaves();
     }
 
 
@@ -25,9 +26,8 @@ public class DBEngine {
 
     }
 
-    public List<Table> loadDBSaves(){
+    public void loadDBSaves(){
 
-        List<Table> loadedTables = new ArrayList<>();
 
         try(Stream<Path> pathsInsideMetaFolder = Files.list(META_DIR);){
             for(Path possibleMetaPath : pathsInsideMetaFolder.toList()){
@@ -35,26 +35,30 @@ public class DBEngine {
                 if(name.endsWith(".meta")){
                     String tableName = name.replaceFirst("\\.meta$","");
                     Table newTable = new Table(tableName);
-                    loadedTables.add(newTable);
+                    this.currentTables.put(tableName, newTable);
                 }
             }
         }
         catch(Exception e){
             throw new RuntimeException(e);
         }
-
-        return loadedTables;
     }
 
 
     public void createTable(String inputString){
         String[] splitStrings = inputString.split(" ",2);
         Table newTable = new Table(splitStrings[0],splitStrings[1]);
-        this.currentTables.add(newTable);
+        this.currentTables.put(splitStrings[0], newTable);
     }
 
-    private @Nullable Table findTable(String s){
-        return this.currentTables.stream().filter(t -> t.getTableName().equals(s)).findFirst().orElse(null);
+    private Table findTable(String s){
+        if(this.currentTables.keySet().contains(s)){
+            return this.currentTables.get(s);
+        }
+        else{
+            System.out.println("No Such Table Found");
+            return null;
+        }
     }
 
     public void insertIntoTable(String newEntryString){
@@ -66,19 +70,45 @@ public class DBEngine {
         targetTable.insert(splitStrings[1]);
     }
 
+    private void printRows(Row[] rows){
+        if(rows == null){
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(Row r : rows){
+            sb.append(Arrays.toString(r.getValues()));
+            sb.append("\n");
+        }
+        System.out.println(sb.toString());
+    }
+
 
     public void selectFromTable(String queryLine){
+
         Row[] returnedResult;
+        if(!queryLine.contains(" ")){
+            Table targetTable = findTable(queryLine);
+            if(targetTable == null) return;
+            System.out.println(Arrays.toString(targetTable.getColumnNames()));
+            returnedResult = targetTable.retrieveAllRow();
+            printRows(returnedResult);
+            return;
+        }
+
         String[] nameAndElse = queryLine.split(" ",2);
         Table targetTable = findTable(nameAndElse[0]);
+        if(targetTable == null) return;
         String query = nameAndElse[1].strip();
         if(query.startsWith("WHERE")){
             returnedResult = targetTable.queryResult(query.split(" ",2)[1]);
             System.out.println(Arrays.toString(targetTable.getColumnNames()));
+            if(returnedResult == null) return;
+            printRows(returnedResult);
         }
         else{
             String[] colsAndQuery = query.split("WHERE");
             returnedResult = targetTable.queryResult(colsAndQuery[1].strip());
+            if(returnedResult == null) return;
             printRowsWithColumnCondition(targetTable, colsAndQuery[0].strip(), returnedResult);
         }
     }

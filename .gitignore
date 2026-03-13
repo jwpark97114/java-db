@@ -3,3 +3,6 @@
 **/build
 out
 save
+storage
+*.meta
+*.table

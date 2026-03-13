@@ -4,13 +4,17 @@ import com.table.Row;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.file.FileSystemException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-
+import static com.file.FilePaths.*;
+import java.nio.file.Files;
 public class MetaData {
 
     // Holds what columns the table has
     // Tells which row is where in saveFile
+    private Path metadataFile;
     private String tableName;
     private String[] columnNames;
     private Map<Integer, Long> idxByteOffsetMap = new HashMap<>();
@@ -20,9 +24,20 @@ public class MetaData {
     public MetaData(String tableName, String[] columns) {
         this.tableName = tableName;
         this.columnNames = columns.clone();
+        this.metadataFile = META_DIR.resolve(this.tableName+".meta");
+        if(!Files.exists(this.metadataFile)){
+            try{
+                Files.createFile(this.metadataFile);
+            }
+            catch(Exception e){
+                throw new RuntimeException(e);
+            }
+        }
+        saveMetaData();
     }
 
     public MetaData(String tableName){
+        this.metadataFile = META_DIR.resolve(tableName+".meta");
         this.loadMetaData(tableName);
     }
 
@@ -35,7 +50,7 @@ public class MetaData {
     public int addRowToMetaData(Row rowToAdd){
         long sizeOfRow = rowToAdd.getSizeInBytes();
         idxByteOffsetMap.put(nextIndex, currentSize);
-        currentSize += sizeOfRow;
+        currentSize += sizeOfRow + Row.sizeOfInteger;
         int returnIndex = nextIndex;
         nextIndex ++;
         saveMetaData(); // Right now it rewrites all metadata everytime
@@ -76,7 +91,7 @@ public class MetaData {
     public void saveMetaData(){
         // we want to store column names, table name,  byteOffset, int, long
         // lets separate saving of byteOffset
-        try(DataOutputStream saveStream = new DataOutputStream( new BufferedOutputStream( new FileOutputStream(this.tableName + ".meta")));){
+        try(DataOutputStream saveStream = new DataOutputStream( new BufferedOutputStream( new FileOutputStream(this.metadataFile.toFile())));){
             byte[] tableNameBytes = this.tableName.getBytes();
             saveStream.writeInt(tableNameBytes.length);
             saveStream.write(tableNameBytes);
@@ -113,7 +128,7 @@ public class MetaData {
     }
 
     public void loadMetaData(String tableName){
-        try(BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(tableName+".meta"))){
+        try(BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(this.metadataFile.toFile()))){
             ByteBuffer readBuffer = ByteBuffer.wrap(inStream.readAllBytes());
             int tableNameByteLength = readBuffer.getInt();
             byte[] tableNameBytes = new byte[tableNameByteLength];

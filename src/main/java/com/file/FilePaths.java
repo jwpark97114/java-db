@@ -10,8 +10,14 @@ public class FilePaths {
     static{
 
         try{
-            Files.createDirectory(TABLE_DIR);
-            Files.createDirectory(META_DIR);
+            if(!Files.exists(BASE_DIR)){
+                Files.createDirectory(BASE_DIR);
+            }
+            if(!Files.exists(TABLE_DIR)){
+                Files.createDirectory(TABLE_DIR);
+            }if(!Files.exists(META_DIR)){
+                Files.createDirectory(META_DIR);
+            }
         }
             catch (Exception e){
             throw new RuntimeException(e);

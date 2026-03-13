@@ -3,6 +3,8 @@ package com.table;
 
 import com.db.MetaData;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +33,11 @@ public class Table {
         String[] parsedColumns = this.parseColumns(columns);
         this.tableName = name;
         this.savePath = TABLE_DIR.resolve(this.tableName + ".table");
+        try{
+            Files.createFile(this.savePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         this.meta = new MetaData(this.tableName, parsedColumns);
         // Load dataPoints with MetaData
 
@@ -75,36 +82,44 @@ public class Table {
     public void insert(String input){
         String[] values = input.split(" ");
         if(values.length != this.meta.getColumnNames().length){
+            System.out.println("The given number of the input values does not match the table's Column number");
             return;
         }
         Row newRow = new Row(values);
         this.addRowInBothTableAndMeta(newRow);
     }
 
-
-    public Row[] queryResult(String condition){
-        List<Row> matchingRows = new ArrayList<>();
-        String column = condition.split("=")[0].strip();
-        String value = condition.split("=")[1].strip();
-        int columnIndex = indexFinder(this.meta.getColumnNames(),column);
-        if(columnIndex == -1){
-            throw new RuntimeException(new ArrayIndexOutOfBoundsException());
-        }
+    public Row[] retrieveAllRow(){
+        List<Row> rows = new ArrayList<>();
         Integer[] pkToFollow =this.meta.getKeysInOffsetMap();
         try(RandomAccessFile raf = new RandomAccessFile(this.savePath.toFile(),"r")){
             for(Integer primaryKey : pkToFollow){
                 Long rowStartsAt = this.meta.getRowOffsetFromFile(primaryKey);
                 raf.seek(rowStartsAt);
                 Row currentRow = this.loadRowFromFile(raf);
-                if(currentRow.getValues()[columnIndex].equals(value)){
-                    matchingRows.add(currentRow);
-                }
+                rows.add(currentRow);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return rows.toArray(new Row[0]);
+    }
 
-        return  matchingRows.toArray(new Row[0]);
+
+    public Row[] queryResult(String condition){
+        if(!condition.contains("=")){
+            System.out.println("Unknown WHERE Condition");
+            return null;
+        }
+        String column = condition.split("=")[0].strip();
+        String value = condition.split("=")[1].strip();
+        int columnIndex = indexFinder(this.meta.getColumnNames(),column);
+        if(columnIndex == -1){
+            throw new RuntimeException(new ArrayIndexOutOfBoundsException());
+        }
+        Row[] allRows = retrieveAllRow();
+
+        return  Arrays.stream(allRows).filter(r -> r.getValues()[columnIndex].equals(value)).toArray(Row[]::new);
     }
 
     public Row loadRowFromFile(RandomAccessFile raf){
